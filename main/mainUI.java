@@ -10,7 +10,7 @@ import java.util.*;
 public class mainUI {
     public static void main(String[] args) {
         // Crear empleado responsable de inspecciones (RI)
-        Empleado ri = new Empleado("Facu", "Pérez", "facu@gmail.com", new Rol("Responsable de Inspecciones", "RI", false));
+        Empleado ri = new Empleado("Facu", "Pérez", "facu@gmail.com", "11111", new Rol("Responsable de Inspecciones", "RI", false));
         Sesion sesion = new Sesion(ri);
         gestorCierreOrdenInspeccion gestor = new gestorCierreOrdenInspeccion(sesion);
 

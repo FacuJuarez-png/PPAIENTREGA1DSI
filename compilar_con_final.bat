@@ -8,6 +8,8 @@ javac -d . gestor\gestorCierreOrdenInspeccion.java
 
 echo Compilando boundary UI...
 javac -d . boundary\PantallaCierreOrdenInspeccion_Final.java
+javac -d . boundary\MonitorCCRS.java
+javac -d . boundary\InterfazNotificacion.java
 
 echo Compilando main UI launcher...
 javac -d . main\mainUI.java

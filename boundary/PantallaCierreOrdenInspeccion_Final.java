@@ -130,7 +130,7 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         Estado cerrado = new Estado("Cerrado", "OrdenDeInspeccion");
         Estado fueraServicio = new Estado("FueraDeServicio", "Sismografo");
 
-        Empleado responsable = new Empleado("Juan", "Juárez", "juan@reparaciones.com", new Rol("Técnico", "Técnico", true));
+        Empleado responsable = new Empleado("Juan", "Juárez", "juan@reparaciones.com", "22222", new Rol("Técnico", "Técnico", true));
         gestor.confirmarCierre(cerrado, fueraServicio, Arrays.asList(responsable));
 
         JOptionPane.showMessageDialog(this, "Orden cerrada correctamente.", "Confirmación", JOptionPane.INFORMATION_MESSAGE);

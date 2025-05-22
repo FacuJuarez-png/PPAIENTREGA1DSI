@@ -23,6 +23,10 @@ public class OrdenDeInspeccion {
         return responsable.equals(e);
     }
 
+    public String getNumeroOrden() {
+        return numeroOrden;
+    }
+
     public boolean esCompletamenteRealizada() {
         return estadoActual.esCompletamenteRealizada();
     }

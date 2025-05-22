@@ -3,6 +3,9 @@ package gestor;
 
 import modelo.*;
 
+import boundary.InterfazNotificacion;
+import boundary.MonitorCCRS;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,10 +15,13 @@ public class gestorCierreOrdenInspeccion {
     private OrdenDeInspeccion ordenSeleccionada;
     private String observacionCierre;
     private List<MotivoFueraDeServicio> motivosSeleccionados;
+    private InterfazNotificacion interfazNotificacion;
+    private List<MonitorCCRS> monitorCCRS;
 
     public gestorCierreOrdenInspeccion(Sesion sesion) {
         this.sesion = sesion;
         this.motivosSeleccionados = new ArrayList<>();
+        this.interfazNotificacion = new InterfazNotificacion();
     }
 
     public List<OrdenDeInspeccion> obtenerOrdenesCompletamenteRealizadas(List<OrdenDeInspeccion> todasLasOrdenes) {
@@ -69,11 +75,40 @@ public class gestorCierreOrdenInspeccion {
 
         sismografo.cambiarEstado(nuevoEstado);
 
+        //prueba para imprimir en consola
         System.out.println("Orden cerrada correctamente.");
         for (Empleado r : responsablesReparacion) {
             if (r.esResponsableDeReparacion()) {
                 System.out.println("Notificación enviada a: " + r.getMail());
             }
+        }
+
+        // Armar cuerpo del mensaje
+
+        // Armar lista de mails y cuerpo
+        List<String> mailsResponsables = new ArrayList<>();
+        String cuerpo = "Se ha cerrado la orden: " + ordenSeleccionada.getNumeroOrden() +
+                        "\nCon observación: " + observacionCierre +
+                        "\nMotivos:\n";
+        
+        for (MotivoFueraDeServicio m : motivosSeleccionados) {
+            cuerpo += "- " + m.getComentario() + "\n";
+        }
+
+        for (Empleado r : responsablesReparacion) {
+            if (r.esResponsableDeReparacion()) {
+                mailsResponsables.add(r.getMail());
+            }
+        }
+
+        // Llamar a notificación
+        interfazNotificacion.notificarResponsablesDeReparacion(mailsResponsables, cuerpo);
+    }
+    
+
+    public void publicarEnMonitoresCCRS(String cuerpoNotificacion) {
+        for (MonitorCCRS pantalla : monitorCCRS) {
+            pantalla.publicar(cuerpoNotificacion);
         }
     }
 }
