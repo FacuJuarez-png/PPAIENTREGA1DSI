@@ -7,107 +7,126 @@ import java.util.Date;
 import java.util.List;
 
 public class gestorCierreOrdenInspeccion {
-    private Sesion sesion;
+    private Empleado empleadoLogueado;
     private OrdenDeInspeccion ordenSeleccionada;
     private String observacionCierre;
-    private List<MotivoFueraDeServicio> motivosSeleccionados;
+    private List<MotivoFueraDeServicio> motivosFueraServicio;
+    private Sesion sesionActual;
+    private boolean ponerSismografoFueraServicio;
 
     public gestorCierreOrdenInspeccion(Sesion sesion) {
-        this.sesion = sesion;
-        this.motivosSeleccionados = new ArrayList<>();
+        this.sesionActual = sesion;
+        this.empleadoLogueado = obtenerRILogueado();
+        this.motivosFueraServicio = new ArrayList<>();
+        nuevoCierreOrdenDeInspeccion();
     }
 
-    public void nuevoCierreOrdenInspeccion() {
-        System.out.println("Gestor: nuevo cierre iniciado.");
+    public void nuevoCierreOrdenDeInspeccion() {
+        // Inicializa cualquier recurso necesario
     }
 
-    public List<OrdenDeInspeccion> obtenerOrdenesCompletamenteRealizadas(List<OrdenDeInspeccion> todasLasOrdenes) {
-        Empleado riLogueado = sesion.obtenerUsuario();
-        List<OrdenDeInspeccion> ordenesValidas = new ArrayList<>();
-        for (OrdenDeInspeccion orden : todasLasOrdenes) {
-            if (orden.esMiRI(riLogueado) && orden.esCompletamenteRealizada()) {
-                ordenesValidas.add(orden);
+    public Empleado obtenerRILogueado() {
+        return sesionActual.obtenerUsuario();
+    }
+
+    public List<OrdenDeInspeccion> mostrarInfoOrdenesInspeccion(List<OrdenDeInspeccion> todas) {
+        return ordenarOrdenesPorFechaFinalizacion(todas);
+    }
+
+    public List<OrdenDeInspeccion> ordenarOrdenesPorFechaFinalizacion(List<OrdenDeInspeccion> ordenes) {
+        List<OrdenDeInspeccion> validas = new ArrayList<>();
+        for (OrdenDeInspeccion o : ordenes) {
+            if (o.esMiRI(empleadoLogueado) && o.esCompletamenteRealizada()) {
+                validas.add(o);
             }
         }
-        return ordenesValidas;
+        validas.sort((a, b) -> b.getFechaHoraFinalizacion().compareTo(a.getFechaHoraFinalizacion()));
+        return validas;
     }
 
-public void tomarSelecOrdenInspeccion(String numeroOrden) {
-    System.out.println("Gestor: orden seleccionada -> " + numeroOrden);
-    // Buscamos entre las ordenes (si las tenés almacenadas), o la pasás directo
-}
+    public void tomarSelectOrdenInspeccion(OrdenDeInspeccion orden) {
+        this.ordenSeleccionada = orden;
+    }
 
-    public void tomarObservacionCierreOrden(String observacion, boolean ponerFueraServicio) {
+    public void tomarObservacionCierreOrden(String observacion, boolean ponerFS) {
         this.observacionCierre = observacion;
-        System.out.println("Gestor: observación tomada. ¿Poner FS? " + ponerFueraServicio);
+        this.ponerSismografoFueraServicio = ponerFS;
+    }
+
+    public boolean validarObservacionCierre() {
+        return observacionCierre != null && !observacionCierre.isEmpty();
+    }
+
+    public List<MotivoTipo> mostrarTiposMotivoFueraDeServicio() {
+        return MotivoTipo.getMotivosTipo();
     }
 
     public void tomarMotivosFueraDeServicio(List<String[]> motivos) {
+        motivosFueraServicio.clear();
         for (String[] par : motivos) {
-            String descripcion = par[0];
+            String desc = par[0];
             String comentario = par[1];
-            MotivoFueraDeServicio motivo = new MotivoFueraDeServicio(descripcion + ": " + comentario);
-            this.motivosSeleccionados.add(motivo);
+            motivosFueraServicio.add(new MotivoFueraDeServicio(desc + ": " + comentario));
         }
-        System.out.println("Gestor: motivos recibidos.");
+    }
+
+    public boolean validarSelectMotivoFueraDeServicio() {
+        return !motivosFueraServicio.isEmpty();
     }
 
     public void tomarConfirmacionCierreOrden(boolean confirmado) {
         if (confirmado) {
-            System.out.println("Gestor: cierre confirmado.");
-            confirmarCierre(
-                new Estado("Cerrado", "OrdenDeInspeccion"),
-                new Estado("FueraDeServicio", "Sismografo"),
-                new ArrayList<>()
-            );
-        } else {
-            System.out.println("Gestor: cierre cancelado.");
+            cerrarOrdenDeInspeccion();
         }
     }
 
-    public void confirmarCierre(Estado estadoCerrado, Estado estadoFueraServicio, List<Empleado> responsablesReparacion) {
-        if (observacionCierre == null || observacionCierre.isEmpty()) {
-            System.out.println("ERROR: Falta la observación de cierre.");
+    public void cerrarOrdenDeInspeccion() {
+        if (!validarObservacionCierre()) {
+            System.out.println("Falta observación.");
+            return;
+        }
+        if (ponerSismografoFueraServicio && !validarSelectMotivoFueraDeServicio()) {
+            System.out.println("Debe ingresar al menos un motivo.");
             return;
         }
 
-        Date ahora = new Date();
+        Date ahora = getFechaHoraActual();
+        Estado estadoCerrado = new Estado("Cerrada", "OrdenDeInspeccion");
         ordenSeleccionada.cerrar(ahora, estadoCerrado);
 
-        Sismografo sismografo = ordenSeleccionada.getEstacion().obtenerSismografo();
-        sismografo.finalizarEstadoActual(ahora);
-
-        List<MotivoFueraDeServicio> copiaMotivos = new ArrayList<>(motivosSeleccionados);
-        CambioEstado nuevoEstado = new CambioEstado(ahora, estadoFueraServicio, copiaMotivos);
-        List<MotivoFueraDeServicio> copia = new ArrayList<>(motivosSeleccionados);
-        for (MotivoFueraDeServicio m : copia) {
-            nuevoEstado.registrarMotivo(m);
-}
-        sismografo.cambiarEstado(nuevoEstado);
-
-        System.out.println("Orden cerrada correctamente.");
-        for (Empleado r : responsablesReparacion) {
-            if (r.esResponsableDeReparacion()) {
-                System.out.println("Notificación enviada a: " + r.getMail());
-            }
+        if (ponerSismografoFueraServicio) {
+            actualizarSismografoAFueraDeServicio(ahora);
         }
+
+        notificarResponsablesDeReparacion();
+        publicarEnMonitoresCCRS();
+    }
+
+    public Date getFechaHoraActual() {
+        return new Date();
+    }
+
+    public void actualizarSismografoAFueraDeServicio(Date ahora) {
+        Estado estadoFS = new Estado("FueraDeServicio", "Sismografo");
+        Sismografo s = ordenSeleccionada.obtenerEstacion().obtenerSismografo();
+        s.finalizarCambioEstadoActual(ahora);
+        CambioEstado nuevo = new CambioEstado(ahora, estadoFS, motivosFueraServicio);
+       List<MotivoFueraDeServicio> copiaMotivos = new ArrayList<>(motivosFueraServicio);
+    for (MotivoFueraDeServicio m : copiaMotivos) {
+    nuevo.registrarMotivo(m);}}
+
+
+    public void notificarResponsablesDeReparacion() {
+        System.out.println("Se notificó al responsable de reparación.");
+    }
+
+    public void publicarEnMonitoresCCRS() {
+        System.out.println("Se publicó en los monitores del CCRS.");
     }
 
     public void finCU() {
-        System.out.println("Gestor: fin de caso de uso.");
-    }
-
-    // Métodos originales por compatibilidad con pruebas sueltas
-    public void seleccionarOrden(OrdenDeInspeccion orden) {
-        this.ordenSeleccionada = orden;
-    }
-
-    public void tomarObservacionCierre(String observacion) {
-        this.observacionCierre = observacion;
-    }
-
-    public void agregarMotivoFueraDeServicio(String comentario) {
-        MotivoFueraDeServicio motivo = new MotivoFueraDeServicio(comentario);
-        this.motivosSeleccionados.add(motivo);
+        this.ordenSeleccionada = null;
+        this.observacionCierre = null;
+        this.motivosFueraServicio.clear();
     }
 }

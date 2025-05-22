@@ -1,5 +1,6 @@
-
 package modelo;
+
+import java.util.Date;
 
 public class Sismografo {
     private String identificador;
@@ -10,15 +11,20 @@ public class Sismografo {
         this.estadoActual = estadoActual;
     }
 
-    public void finalizarEstadoActual(java.util.Date fecha) {
+    public void finalizarCambioEstadoActual(Date fecha) {
         estadoActual.setFechaHoraDesde(fecha);
     }
 
-    public void cambiarEstado(CambioEstado nuevo) {
+    public void registrarCambioEstado(CambioEstado nuevo) {
         this.estadoActual = nuevo;
     }
 
-    public CambioEstado obtenerEstadoActual() {
+    // Método alternativo con nombre cambiarEstado para compatibilidad
+    public void cambiarEstado(CambioEstado nuevo) {
+        registrarCambioEstado(nuevo);
+    }
+
+    public CambioEstado getEstadoActual() {
         return estadoActual;
     }
 
@@ -30,4 +36,7 @@ public class Sismografo {
         this.identificador = identificador;
     }
 
+    public boolean esMiEstacion(EstacionSismologica estacion) {
+        return estacion != null && estacion.obtenerSismografo() == this;
+    }
 }

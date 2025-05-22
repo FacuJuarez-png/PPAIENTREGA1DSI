@@ -19,4 +19,11 @@ public class EstacionSismologica {
 
     public Sismografo obtenerSismografo() { return sismografo; }
 
+    public String mostrarIdentificadorSismografo() {
+        return sismografo.getIdentificador();
+    }
+
+    public void actualizarSismografoFueraDeServicio(CambioEstado estado) {
+        sismografo.cambiarEstado(estado);
+    }
 }

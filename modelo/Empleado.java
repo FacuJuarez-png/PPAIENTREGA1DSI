@@ -1,4 +1,3 @@
-
 package modelo;
 
 public class Empleado {
@@ -14,7 +13,6 @@ public class Empleado {
         this.rol = rol;
     }
 
-    // Getters y Setters para atributos simples
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -24,9 +22,12 @@ public class Empleado {
     public String getMail() { return mail; }
     public void setMail(String mail) { this.mail = mail; }
 
-    // Relación
     public Rol obtenerRol() { return rol; }
     public boolean esResponsableDeReparacion() {
-    return rol != null && rol.getTipo().equalsIgnoreCase("Técnico");
-}
+        return rol != null && rol.getTipo().equalsIgnoreCase("Técnico");
+    }
+
+    public String obtenerMail() {
+        return mail;
+    }
 }

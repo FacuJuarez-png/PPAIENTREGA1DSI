@@ -18,46 +18,48 @@ public class mainUI {
         Sesion sesion = new Sesion(ri);
 
         // Crear estados
-        Estado estadoOrden = Estado.buscarPorNombre("CompletamenteRealizada", "OrdenDeInspeccion");
+        Estado estadoCompletada = Estado.buscarPorNombre("CompletamenteRealizada", "OrdenDeInspeccion");
         Estado estadoSismografo = Estado.buscarPorNombre("Inhabilitado", "Sismografo");
 
-        // Crear sismógrafo
+        // Crear estado actual del sismógrafo
         List<MotivoFueraDeServicio> vacio = new ArrayList<>();
         CambioEstado estadoActual = new CambioEstado(new Date(), estadoSismografo, vacio);
+
+        // Crear sismógrafo
         Sismografo sismografo = new Sismografo("S001", estadoActual);
 
         // Crear estación
         EstacionSismologica estacion = new EstacionSismologica("Estación Norte", "ES01", sismografo);
 
-        // Crear órdenes
- // Estado inicial realista
-Estado estadoPendiente = new Estado("Pendiente", "OrdenDeInspeccion");
+        // Crear orden con estado completamente realizada (solo esta aparecerá en la tabla)
+        OrdenDeInspeccion orden1 = new OrdenDeInspeccion(
+            "OI001",
+            new Date(),
+            estadoCompletada,
+            ri,
+            estacion
+        );
 
-// Empleado responsable (ya deberías tenerlo creado como `ri`)
-OrdenDeInspeccion orden1 = new OrdenDeInspeccion(
-    "OI001",
-    new Date(), // fecha actual
-    estadoPendiente,
-    ri,
-    estacion
-);
+        // Crear orden que no aparecerá (estado pendiente)
+        Estado estadoPendiente = new Estado("Pendiente", "OrdenDeInspeccion");
+        OrdenDeInspeccion orden2 = new OrdenDeInspeccion(
+            "OI002",
+            new Date(System.currentTimeMillis() - 86400000),
+            estadoPendiente,
+            ri,
+            estacion
+        );
 
-// Orden creada el día anterior
-OrdenDeInspeccion orden2 = new OrdenDeInspeccion(
-    "OI002",
-    new Date(System.currentTimeMillis() - 86400000), // hace 1 día
-    estadoPendiente,
-    ri,
-    estacion
-);
+        // Crear lista total de órdenes
+        List<OrdenDeInspeccion> todasLasOrdenes = new ArrayList<>();
+        todasLasOrdenes.add(orden1);
+        todasLasOrdenes.add(orden2);
 
-
-        List<OrdenDeInspeccion> ordenes = new ArrayList<>();
-        ordenes.add(orden1);
-        ordenes.add(orden2);
-
-        // Lanzar gestor y UI
+        // Crear gestor y filtrar órdenes válidas
         gestorCierreOrdenInspeccion gestor = new gestorCierreOrdenInspeccion(sesion);
-        new PantallaCierreOrdenInspeccion_Final(gestor, ordenes);
+        List<OrdenDeInspeccion> ordenesValidas = gestor.mostrarInfoOrdenesInspeccion(todasLasOrdenes);
+
+        // Lanzar la interfaz
+        new PantallaCierreOrdenInspeccion_Final(gestor, ordenesValidas);
     }
 }

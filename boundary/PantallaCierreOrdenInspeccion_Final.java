@@ -8,9 +8,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
+
 
 public class PantallaCierreOrdenInspeccion_Final extends JFrame {
     private gestorCierreOrdenInspeccion gestor;
@@ -23,6 +26,8 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
     private JPanel contenedorCentral;
     private Map<MotivoTipo, JTextField> camposComentarios = new HashMap<>();
     private List<OrdenDeInspeccion> ordenesDisponibles;
+    private JLabel resumenFinal;
+    
 
     public PantallaCierreOrdenInspeccion_Final(gestorCierreOrdenInspeccion gestor, List<OrdenDeInspeccion> ordenes) {
         this.gestor = gestor;
@@ -31,11 +36,11 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        mostrarMenuPrincipal();
+        habilitarVentana();
         setVisible(true);
     }
 
-    private void mostrarMenuPrincipal() {
+    public void habilitarVentana() {
         getContentPane().removeAll();
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -46,25 +51,31 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
 
         JButton btnCerrarOrden = new JButton("Cerrar Orden de Inspección");
         btnCerrarOrden.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnCerrarOrden.addActionListener(e -> mostrarFormularioCierre());
+        btnCerrarOrden.addActionListener(e -> opcionCerrarOrdenDeInspeccion());
+
+        resumenFinal = new JLabel(" ");
+        resumenFinal.setAlignmentX(Component.CENTER_ALIGNMENT);
+        resumenFinal.setFont(new Font("Arial", Font.ITALIC, 12));
 
         panel.add(Box.createVerticalStrut(50));
         panel.add(titulo);
         panel.add(Box.createVerticalStrut(20));
         panel.add(btnCerrarOrden);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(resumenFinal);
 
         getContentPane().add(panel, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
 
-    private void mostrarFormularioCierre() {
+    public void opcionCerrarOrdenDeInspeccion() {
         getContentPane().removeAll();
         getContentPane().setLayout(new BorderLayout());
         contenedorCentral = new JPanel();
         contenedorCentral.setLayout(new BoxLayout(contenedorCentral, BoxLayout.Y_AXIS));
 
-        initTablaOrdenes(ordenesDisponibles);
+        infoOrdenesInspeccion();
         initComponentes();
 
         getContentPane().add(new JScrollPane(tablaOrdenes), BorderLayout.NORTH);
@@ -74,11 +85,12 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         repaint();
     }
 
-    private void initTablaOrdenes(List<OrdenDeInspeccion> ordenes) {
+    public void infoOrdenesInspeccion() {
         modeloTabla = new DefaultTableModel(new Object[]{"Seleccionar", "Nro Orden", "Fecha Fin", "Sismógrafo"}, 0);
-        for (OrdenDeInspeccion o : ordenes) {
-            modeloTabla.addRow(new Object[]{false, o.getNumero(), o.getFechaHoraFin(), o.getEstacion().obtenerSismografo().getIdentificador()});
-        }
+        List<OrdenDeInspeccion> ordenesValidas = gestor.mostrarInfoOrdenesInspeccion(ordenesDisponibles);
+        for (OrdenDeInspeccion o : ordenesValidas) {
+            modeloTabla.addRow(new Object[]{false, o.getNumero(), o.getFechaHoraFinalizacion(), o.obtenerEstacion().obtenerSismografo().getIdentificador()});
+
 
         tablaOrdenes = new JTable(modeloTabla) {
             public Class<?> getColumnClass(int column) {
@@ -87,12 +99,11 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         };
 
         btnSeleccionarOrden = new JButton("Seleccionar Orden");
-        btnSeleccionarOrden.addActionListener(this::seleccionarOrden);
-        contenedorCentral.add(btnSeleccionarOrden);
+        btnSeleccionarOrden.addActionListener(this::tomarSelecOrdenInspeccion);
+        contenedorCentral.add(btnSeleccionarOrden);}
     }
 
     private void initComponentes() {
-        // Observación
         panelObservacion = new JPanel();
         panelObservacion.setLayout(new BoxLayout(panelObservacion, BoxLayout.Y_AXIS));
         panelObservacion.setVisible(false);
@@ -100,7 +111,7 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         campoObservacion = new JTextArea(3, 50);
         checkPonerFS = new JCheckBox("¿Registrar sismógrafo como fuera de servicio?");
         btnConfirmarObservacion = new JButton("Confirmar Observación");
-        btnConfirmarObservacion.addActionListener(this::confirmarObservacion);
+        btnConfirmarObservacion.addActionListener(this::tomarObservacionCierreOrden);
 
         panelObservacion.add(new JLabel("Observación de cierre:"));
         panelObservacion.add(new JScrollPane(campoObservacion));
@@ -108,17 +119,15 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         panelObservacion.add(btnConfirmarObservacion);
         contenedorCentral.add(panelObservacion);
 
-        // Motivos
         panelMotivos = new JPanel();
         panelMotivos.setLayout(new BoxLayout(panelMotivos, BoxLayout.Y_AXIS));
         panelMotivos.setVisible(false);
 
         btnConfirmarMotivos = new JButton("Confirmar Motivos");
-        btnConfirmarMotivos.addActionListener(this::confirmarMotivos);
+        btnConfirmarMotivos.addActionListener(this::tomarComentarioPorMotivoTipo);
         panelMotivos.add(btnConfirmarMotivos);
         contenedorCentral.add(panelMotivos);
 
-        // Confirmación
         panelConfirmacion = new JPanel();
         panelConfirmacion.setLayout(new FlowLayout());
         panelConfirmacion.setVisible(false);
@@ -128,33 +137,47 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
 
         btnConfirmarCierre.addActionListener(e -> {
             gestor.tomarConfirmacionCierreOrden(true);
+
+            List<String> notificaciones = Arrays.asList(
+                "Se notificó al responsable de reparaciones.",
+                "Sismógrafo marcado como Fuera de Servicio.",
+                "Orden cerrada correctamente."
+            );
+
+            new PantallaNotificacion(notificaciones);
             JOptionPane.showMessageDialog(this, "La orden fue cerrada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            resumenFinal.setText("Última acción: Orden cerrada y notificaciones enviadas.");
             gestor.finCU();
-            mostrarMenuPrincipal();
+            habilitarVentana();
         });
 
         btnCancelar.addActionListener(e -> {
             gestor.tomarConfirmacionCierreOrden(false);
+            resumenFinal.setText("Acción cancelada por el usuario.");
             gestor.finCU();
-            mostrarMenuPrincipal();
+            habilitarVentana();
         });
 
         panelConfirmacion.add(btnConfirmarCierre);
         panelConfirmacion.add(btnCancelar);
     }
 
-    private void seleccionarOrden(ActionEvent e) {
+    public void tomarSelecOrdenInspeccion(ActionEvent e) {
         int row = tablaOrdenes.getSelectedRow();
         if (row != -1) {
             OrdenDeInspeccion ordenSeleccionada = ordenesDisponibles.get(row);
-            gestor.seleccionarOrden(ordenSeleccionada);
+            gestor.tomarSelectOrdenInspeccion(ordenSeleccionada);
             tablaOrdenes.setEnabled(false);
             btnSeleccionarOrden.setEnabled(false);
-            panelObservacion.setVisible(true);
+            solicitarObservacionCierreOrden();
         }
     }
 
-    private void confirmarObservacion(ActionEvent e) {
+    public void solicitarObservacionCierreOrden() {
+        panelObservacion.setVisible(true);
+    }
+
+    public void tomarObservacionCierreOrden(ActionEvent e) {
         String obs = campoObservacion.getText();
         boolean ponerFS = checkPonerFS.isSelected();
         gestor.tomarObservacionCierreOrden(obs, ponerFS);
@@ -162,12 +185,12 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         checkPonerFS.setEnabled(false);
         campoObservacion.setEnabled(false);
         btnConfirmarObservacion.setEnabled(false);
-        if (ponerFS) mostrarMotivos();
-        else mostrarConfirmacionFinal();
+        if (ponerFS) solicitarMotivosFueraDeServicio();
+        else solicitarConfirmacionCierreOrden();
     }
 
-    private void mostrarMotivos() {
-        List<MotivoTipo> motivos = MotivoTipo.getMotivosTipo();
+    public void solicitarMotivosFueraDeServicio() {
+        List<MotivoTipo> motivos = gestor.mostrarTiposMotivoFueraDeServicio();
         for (MotivoTipo motivo : motivos) {
             JCheckBox check = new JCheckBox(motivo.getDescripcion());
             JTextField comentario = new JTextField(40);
@@ -181,23 +204,22 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         panelMotivos.setVisible(true);
     }
 
-    private void confirmarMotivos(ActionEvent e) {
+    public void tomarComentarioPorMotivoTipo(ActionEvent e) {
         List<String[]> motivosSeleccionados = new ArrayList<>();
         for (Map.Entry<MotivoTipo, JTextField> entry : camposComentarios.entrySet()) {
             MotivoTipo tipo = entry.getKey();
             JTextField campo = entry.getValue();
             if (campo.isEnabled()) {
-                String comentario = campo.getText();
-                motivosSeleccionados.add(new String[]{tipo.getDescripcion(), comentario});
+                motivosSeleccionados.add(new String[]{tipo.getDescripcion(), campo.getText()});
             }
         }
         gestor.tomarMotivosFueraDeServicio(motivosSeleccionados);
         panelMotivos.setEnabled(false);
         btnConfirmarMotivos.setEnabled(false);
-        mostrarConfirmacionFinal();
+        solicitarConfirmacionCierreOrden();
     }
 
-    private void mostrarConfirmacionFinal() {
+    public void solicitarConfirmacionCierreOrden() {
         panelConfirmacion.setVisible(true);
     }
 }

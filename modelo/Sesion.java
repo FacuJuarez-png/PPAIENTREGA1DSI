@@ -7,6 +7,11 @@ public class Sesion {
         this.usuario = usuario;
     }
 
-    public Empleado obtenerUsuario() { return usuario; }
+    public Empleado obtenerUsuario() {
+        return usuario;
+    }
 
+    public Empleado obtenerRILogueado() {
+        return usuario;
+    }
 }

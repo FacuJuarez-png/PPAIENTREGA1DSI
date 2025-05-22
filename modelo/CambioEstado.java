@@ -1,4 +1,3 @@
-
 package modelo;
 
 import java.util.Date;
@@ -28,7 +27,7 @@ public class CambioEstado {
         this.fechaHoraDesde = fechaHoraDesde;
     }
 
-    public Estado obtenerEstado() {
+    public Estado getEstado() {
         return estado;
     }
 
@@ -36,7 +35,7 @@ public class CambioEstado {
         this.estado = estado;
     }
 
-    public List<MotivoFueraDeServicio> obtenerMotivos() {
+    public List<MotivoFueraDeServicio> getMotivos() {
         return motivos;
     }
 
