@@ -1,18 +1,13 @@
-
 package modelo;
 
 public class MotivoFueraDeServicio {
-    private String comentario;
+    private String descripcion;
 
-    public MotivoFueraDeServicio(String comentario) {
-        this.comentario = comentario;
+    public MotivoFueraDeServicio(String descripcion) {
+        this.descripcion = descripcion;
     }
 
-    public String getComentario() {
-        return comentario;
-    }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
-    }
 }

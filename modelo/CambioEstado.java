@@ -2,26 +2,45 @@
 package modelo;
 
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 public class CambioEstado {
-    private Date fechaHoraInicio;
-    private Date fechaHoraFin;
+    private Date fechaHoraDesde;
     private Estado estado;
-    private List<MotivoFueraDeServicio> motivosFueraDeServicio;
+    private List<MotivoFueraDeServicio> motivos = new ArrayList<>();
 
-    public CambioEstado(Estado estado, Date fechaHoraInicio) {
+    public CambioEstado(Date fechaHoraDesde, Estado estado, List<MotivoFueraDeServicio> motivos) {
+        this.fechaHoraDesde = fechaHoraDesde;
         this.estado = estado;
-        this.fechaHoraInicio = fechaHoraInicio;
-        this.motivosFueraDeServicio = new ArrayList<>();
-    }
-
-    public void setFechaHoraFin(Date fechaHoraFin) {
-        this.fechaHoraFin = fechaHoraFin;
+        this.motivos = motivos;
     }
 
     public void registrarMotivo(MotivoFueraDeServicio motivo) {
-        motivosFueraDeServicio.add(motivo);
+        motivos.add(motivo);
+    }
+
+    public Date getFechaHoraDesde() {
+        return fechaHoraDesde;
+    }
+
+    public void setFechaHoraDesde(Date fechaHoraDesde) {
+        this.fechaHoraDesde = fechaHoraDesde;
+    }
+
+    public Estado obtenerEstado() {
+        return estado;
+    }
+
+    public void setEstado(Estado estado) {
+        this.estado = estado;
+    }
+
+    public List<MotivoFueraDeServicio> obtenerMotivos() {
+        return motivos;
+    }
+
+    public void setMotivos(List<MotivoFueraDeServicio> motivos) {
+        this.motivos = motivos;
     }
 }

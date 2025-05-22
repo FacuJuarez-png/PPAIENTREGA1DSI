@@ -1,35 +1,33 @@
 
 package modelo;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 public class Sismografo {
-    private String nroSerie;
+    private String identificador;
     private CambioEstado estadoActual;
-    private List<CambioEstado> cambiosEstado;
 
-    public Sismografo(String nroSerie, CambioEstado estadoActual) {
-        this.nroSerie = nroSerie;
+    public Sismografo(String identificador, CambioEstado estadoActual) {
+        this.identificador = identificador;
         this.estadoActual = estadoActual;
-        this.cambiosEstado = new ArrayList<>();
     }
 
-    public void finalizarEstadoActual(Date fechaFin) {
-        this.estadoActual.setFechaHoraFin(fechaFin);
+    public void finalizarEstadoActual(java.util.Date fecha) {
+        estadoActual.setFechaHoraDesde(fecha);
     }
 
-    public void setEstadoActual(CambioEstado nuevoEstado) {
-        this.estadoActual = nuevoEstado;
+    public void cambiarEstado(CambioEstado nuevo) {
+        this.estadoActual = nuevo;
     }
 
-    public void cambiarEstado(CambioEstado nuevoCambioEstado) {
-        this.cambiosEstado.add(nuevoCambioEstado);
-        this.setEstadoActual(nuevoCambioEstado);
+    public CambioEstado obtenerEstadoActual() {
+        return estadoActual;
     }
 
     public String getIdentificador() {
-        return nroSerie;
+        return identificador;
     }
+
+    public void setIdentificador(String identificador) {
+        this.identificador = identificador;
+    }
+
 }

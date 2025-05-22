@@ -4,6 +4,7 @@ package main;
 import gestor.gestorCierreOrdenInspeccion;
 import modelo.Empleado;
 import modelo.Estado;
+import modelo.MotivoFueraDeServicio;
 import modelo.OrdenDeInspeccion;
 import modelo.Rol;
 import modelo.Sesion;
@@ -20,20 +21,21 @@ public class main {
         Estado estadoInhabilitado = new Estado("Inhabilitado", "Sismografo");
         Estado estadoFueraServicio = new Estado("FueraDeServicio", "Sismografo");
 
-        Rol rolRI = new Rol("Responsable de Inspecciones", "RI", false);
-        Rol rolTecnico = new Rol("Técnico", "Técnico", true);
+        Rol rolRI = new Rol("Responsable de Inspecciones", "RI");
+        Rol rolTecnico = new Rol("Técnico", "Técnico");
 
         Empleado empleadoRI = new Empleado("Facundo", "Pérez", "facundo@gmail.com", rolRI);
         Empleado tecnico = new Empleado("Juan", "Juárez", "juan@reparaciones.com", rolTecnico);
 
         Sesion sesion = new Sesion(empleadoRI);
 
-        CambioEstado estadoActualSismografo = new CambioEstado(estadoInhabilitado, new Date());
+    List<MotivoFueraDeServicio> motivosIniciales = new ArrayList<>();
+    CambioEstado estadoActualSismografo = new CambioEstado(new Date(), estadoInhabilitado, motivosIniciales);
         Sismografo sismografo = new Sismografo("S001", estadoActualSismografo);
         EstacionSismologica estacion = new EstacionSismologica("Estación Norte", "ES01", sismografo);
 
-        OrdenDeInspeccion orden1 = new OrdenDeInspeccion("OI001", new Date(System.currentTimeMillis() - 3600000),
-                estadoCompletada, empleadoRI, estacion);
+
+        OrdenDeInspeccion orden1 = new OrdenDeInspeccion("OI001", new Date(), estadoCompletada, empleadoRI , estacion);
 
         List<OrdenDeInspeccion> todasLasOrdenes = new ArrayList<>();
         todasLasOrdenes.add(orden1);

@@ -1,14 +1,12 @@
-
 package modelo;
 
 public class Sesion {
-    private Empleado empleadoLogueado;
+    private Empleado usuario;
 
-    public Sesion(Empleado empleadoLogueado) {
-        this.empleadoLogueado = empleadoLogueado;
+    public Sesion(Empleado usuario) {
+        this.usuario = usuario;
     }
 
-    public Empleado obtenerUsuario() {
-        return empleadoLogueado;
-    }
+    public Empleado obtenerUsuario() { return usuario; }
+
 }

@@ -1,36 +1,33 @@
-
 package modelo;
 
 public class Estado {
-    private String nombreEstado;
+    private String nombre;
     private String ambito;
 
-    public Estado(String nombreEstado, String ambito) {
-        this.nombreEstado = nombreEstado;
+    public Estado(String nombre, String ambito) {
+        this.nombre = nombre;
         this.ambito = ambito;
     }
 
-    public boolean esAmbitoOrdenDeInspeccion() {
-        return ambito.equals("OrdenDeInspeccion");
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public boolean esCompletamenteRealizada() {
-        return nombreEstado.equals("CompletamenteRealizada");
-    }
+    public String getAmbito() { return ambito; }
+    public void setAmbito(String ambito) { this.ambito = ambito; }
 
-    public boolean esCerrado() {
-        return nombreEstado.equals("Cerrado");
-    }
-
-    public boolean esAmbitoSismografo() {
-        return ambito.equals("Sismografo");
+    public boolean esCerrada() {
+        return nombre.equalsIgnoreCase("Cerrado") && ambito.equalsIgnoreCase("OrdenDeInspeccion");
     }
 
     public boolean esFueraDeServicio() {
-        return nombreEstado.equals("FueraDeServicio");
+        return nombre.equalsIgnoreCase("FueraDeServicio") && ambito.equalsIgnoreCase("Sismografo");
     }
 
-    public String getNombre() {
-        return nombreEstado;
+    public boolean esCompletamenteRealizada() {
+        return nombre.equalsIgnoreCase("CompletamenteRealizada") && ambito.equalsIgnoreCase("OrdenDeInspeccion");
+    }
+
+    public static Estado buscarPorNombre(String nombre, String ambito) {
+        return new Estado(nombre, ambito);
     }
 }
