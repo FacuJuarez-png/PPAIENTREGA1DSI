@@ -2,6 +2,8 @@ package gestor;
 
 import modelo.*;
 
+import boundary.InterfazNotificacion;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +13,7 @@ public class gestorCierreOrdenInspeccion {
     private OrdenDeInspeccion ordenSeleccionada;
     private String observacionCierre;
     private List<MotivoFueraDeServicio> motivosFueraServicio;
+    private InterfazNotificacion interfazNotificacion;
     private Sesion sesionActual;
     private boolean ponerSismografoFueraServicio;
 
@@ -18,6 +21,7 @@ public class gestorCierreOrdenInspeccion {
         this.sesionActual = sesion;
         this.empleadoLogueado = obtenerRILogueado();
         this.motivosFueraServicio = new ArrayList<>();
+        this.interfazNotificacion = new InterfazNotificacion();
         nuevoCierreOrdenDeInspeccion();
     }
 
@@ -100,6 +104,39 @@ public class gestorCierreOrdenInspeccion {
 
         notificarResponsablesDeReparacion();
         publicarEnMonitoresCCRS();
+
+        //Cuerpo para interfazNotificacion
+
+        //creo el tecnico
+        Empleado tecnico1 = new Empleado("Juan", "Juárez", "juan@reparaciones.com", new Rol("Técnico", "Técnico"));
+        List<Empleado> empleadosReparacion = List.of(tecnico1);
+
+        List<String> mailsResponsables = new ArrayList<>();
+
+        // Usamos StringBuilder para mejor rendimiento
+        StringBuilder cuerpo = new StringBuilder();
+        cuerpo.append("Se ha cerrado la orden: ").append(ordenSeleccionada.getNumero())
+            .append("\nCon observación: ").append(observacionCierre)
+            .append("\nMotivos:\n");
+
+        // Usamos Set para evitar motivos duplicados
+        java.util.Set<String> yaAgregados = new java.util.HashSet<>();
+        for (MotivoFueraDeServicio m : motivosFueraServicio) {
+            String descripcion = m.getDescripcion();
+            if (yaAgregados.add(descripcion)) {
+                cuerpo.append("- ").append(descripcion).append("\n");
+            }
+        }
+
+        for (Empleado r : empleadosReparacion) {
+            if (r.esResponsableDeReparacion()) {
+                mailsResponsables.add(r.getMail());
+            }
+        }
+
+        // Enviar notificación
+        interfazNotificacion.enviarNotificaion(mailsResponsables, cuerpo.toString());
+
     }
 
     public Date getFechaHoraActual() {

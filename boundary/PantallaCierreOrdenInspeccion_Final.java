@@ -102,6 +102,7 @@ public class PantallaCierreOrdenInspeccion_Final extends JFrame {
         btnSeleccionarOrden.addActionListener(this::tomarSelecOrdenInspeccion);
         contenedorCentral.add(btnSeleccionarOrden);}
     }
+    
 
     private void initComponentes() {
         panelObservacion = new JPanel();
